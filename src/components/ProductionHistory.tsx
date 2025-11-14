@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
+import { useManufacturing } from "@/contexts/ManufacturingContext";
 
 interface ProductionHistoryProps {
-  lots: Lot[];
   onSelectLot: (lot: Lot) => void;
 }
 
-export const ProductionHistory = ({ lots, onSelectLot }: ProductionHistoryProps) => {
+export const ProductionHistory = ({  onSelectLot }: ProductionHistoryProps) => {
+  const { lots } = useManufacturing();
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString([], {
       month: "short",

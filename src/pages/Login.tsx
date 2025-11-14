@@ -4,7 +4,7 @@ import { useOperator } from "@/contexts/OperatorContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { Factory, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const operators = ["John Smith", "Maria Garcia", "David Chen", "Sarah Johnson", "Ahmed Hassan"];
@@ -39,7 +39,7 @@ export default function Login() {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-8 w-8 text-primary" />
+              <Factory className="h-12 w-12 text-primary" />
             </div>
           </div>
           <CardTitle className="text-2xl text-center">MES Login</CardTitle>

@@ -9,140 +9,101 @@ import { ProductionHistory } from "@/components/ProductionHistory";
 import { TraceabilityView } from "@/components/TraceabilityView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Factory, History } from "lucide-react";
+import { Factory, History, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useManufacturing } from "@/contexts/ManufacturingContext";
+import { BatchCompletionDialog } from "@/components/BatchCompletionDialog";
 
-const initialBatches: Batch[] = [
-  {
-    id: "B-001",
-    productName: "Chocolate Syrup 10L",
-    targetQuantity: 1000,
-    uom: "L",
-    status: "Planned",
-    materials: [
-      { name: "Cocoa Powder", plannedQty: 200, unit: "kg" },
-      { name: "Sugar", plannedQty: 300, unit: "kg" },
-      { name: "Milk", plannedQty: 500, unit: "L" },
-    ],
-  },
-  {
-    id: "B-002",
-    productName: "Vanilla Mix 5L",
-    targetQuantity: 500,
-    uom: "L",
-    status: "Planned",
-    materials: [
-      { name: "Vanilla Extract", plannedQty: 50, unit: "L" },
-      { name: "Sugar", plannedQty: 150, unit: "kg" },
-      { name: "Milk", plannedQty: 300, unit: "L" },
-    ],
-  },
-  {
-    id: "B-003",
-    productName: "Strawberry Blend 8L",
-    targetQuantity: 800,
-    uom: "L",
-    status: "Planned",
-    materials: [
-      { name: "Strawberry Puree", plannedQty: 250, unit: "kg" },
-      { name: "Sugar", plannedQty: 200, unit: "kg" },
-      { name: "Water", plannedQty: 350, unit: "L" },
-    ],
-  },
-];
+
+
 
 const ManufacturingDashboard = () => {
-  const { operator } = useOperator();
+  const { operator, logout } = useOperator();
   const navigate = useNavigate();
-  const [batches, setBatches] = useState<Batch[]>(initialBatches);
-  const [completingBatch, setCompletingBatch] = useState<Batch | null>(null);
   const [lots, setLots] = useState<Lot[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
-
+ const { batches, updateBatch, completeBatch } = useManufacturing();
+   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   useEffect(() => {
     if (!operator) {
       navigate("/login");
     }
   }, [operator, navigate]);
 
-  const handleStart = (id: string) => {
-    if (!operator) {
-      toast.error("Please select an operator first");
-      return;
-    }
+  
 
-    setBatches((prev) =>
-      prev.map((b) =>
-        b.id === id
-          ? {
-              ...b,
-              status: b.status === "Paused" ? "In Process" : "In Process",
-              startTime: b.startTime || new Date().toISOString(),
-              pauseTime: undefined,
-              operator,
-            }
-          : b
-      )
-    );
-    toast.success(`Batch ${id} started by ${operator}`);
+ const handleStartBatch = (batchId: string) => {
+    updateBatch(batchId, {
+      status: "In Process",
+      startTime: new Date().toISOString(),
+      operator,
+    });
   };
 
-  const handlePause = (id: string) => {
-    setBatches((prev) =>
-      prev.map((b) =>
-        b.id === id
-          ? { ...b, status: "Paused", pauseTime: new Date().toISOString() }
-          : b
-      )
-    );
-    toast.info(`Batch ${id} paused`);
+  const handlePauseBatch = (batchId: string) => {
+    updateBatch(batchId, {
+      status: "Paused",
+      pauseTime: new Date().toISOString(),
+    });
   };
 
-  const handleComplete = (id: string) => {
-    const batch = batches.find((b) => b.id === id);
-    if (batch) {
-      setCompletingBatch(batch);
+    const handleCompleteBatch = (data: any) => {
+    if (selectedBatch) {
+      completeBatch(selectedBatch.id, data);
+      setCompletionDialogOpen(false);
+      setSelectedBatch(null);
     }
   };
 
-  const handleSaveCompletion = (data: {
-    batchId: string;
-    actualYield: number;
-    scrapQuantity: number;
-    lotNumber: string;
-    materials: any[];
-    operator: string;
-  }) => {
-    setBatches((prev) =>
-      prev.map((b) =>
-        b.id === data.batchId
-          ? { ...b, status: "Completed", endTime: new Date().toISOString() }
-          : b
-      )
-    );
-
-    const batch = batches.find((b) => b.id === data.batchId);
-    if (batch) {
-      const newLot: Lot = {
-        lot: data.lotNumber,
-        product: batch.productName,
-        yield: data.actualYield,
-        batchId: data.batchId,
-        operator: data.operator,
-        inputs: data.materials.map((m) => ({
-          material: m.name,
-          qty: m.actualQty || m.plannedQty,
-          unit: m.unit,
-        })),
-        completedAt: new Date().toISOString(),
-      };
-      setLots((prev) => [newLot, ...prev]);
-    }
-
-    setCompletingBatch(null);
-    toast.success(`Batch ${data.batchId} completed successfully! Lot: ${data.lotNumber}`);
+  const handleOpenCompletion = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setCompletionDialogOpen(true);
   };
 
-  const activeBatches = batches.filter((b) => b.status !== "Completed");
+  // const handleSaveCompletion = (data: {
+  //   batchId: string;
+  //   actualYield: number;
+  //   scrapQuantity: number;
+  //   lotNumber: string;
+  //   materials: any[];
+  //   operator: string;
+  // }) => {
+
+  //   if (selectedBatch) {
+  //     completeBatch(selectedBatch.id, data);
+  //     setCompletionDialogOpen(false);
+  //     setSelectedBatch(null);
+  //   }
+
+  //   const batch = batches.find((b) => b.id === data.batchId);
+  //   if (batch) {
+  //     const newLot: Lot = {
+  //       lot: data.lotNumber,
+  //       product: batch.productName,
+  //       yield: data.actualYield,
+  //       batchId: data.batchId,
+  //       operator: data.operator,
+  //       inputs: data.materials.map((m) => ({
+  //         material: m.name,
+  //         qty: m.actualQty || m.plannedQty,
+  //         unit: m.unit,
+  //       })),
+  //       completedAt: new Date().toISOString(),
+  //     };
+  //     setLots((prev) => [newLot, ...prev]);
+  //   }
+
+  //   setCompletingBatch(null);
+  //   toast.success(`Batch ${data.batchId} completed successfully! Lot: ${data.lotNumber}`);
+  // };
+
+   const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+const activeBatches = batches.filter((b) => b.status !== "Completed");
   const completedCount = batches.filter((b) => b.status === "Completed").length;
 
   return (
@@ -157,7 +118,11 @@ const ManufacturingDashboard = () => {
                 <p className="text-sm text-muted-foreground">Production Floor Dashboard</p>
               </div>
             </div>
-            <OperatorSelect />
+            {/* <OperatorSelect /> */}
+             <Button  onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
           </div>
         </div>
       </header>
@@ -191,9 +156,9 @@ const ManufacturingDashboard = () => {
                   <BatchCard
                     key={batch.id}
                     batch={batch}
-                    onStart={handleStart}
-                    onPause={handlePause}
-                    onComplete={handleComplete}
+                    onStart={() => handleStartBatch(batch.id)}
+                    onPause={() => handlePauseBatch(batch.id)}
+                    onComplete={() => handleOpenCompletion(batch)}
                   />
                 ))}
               </div>
@@ -201,15 +166,23 @@ const ManufacturingDashboard = () => {
           </TabsContent>
 
           <TabsContent value="history">
-            <ProductionHistory lots={lots} onSelectLot={setSelectedLot} />
+            <ProductionHistory onSelectLot={setSelectedLot}  />
           </TabsContent>
         </Tabs>
       </main>
 
-      <BatchCompletionForm
+      {/* <BatchCompletionForm
         batch={completingBatch}
         onClose={() => setCompletingBatch(null)}
         onSave={handleSaveCompletion}
+      /> */}
+
+      <BatchCompletionDialog
+        batch={selectedBatch}
+        open={completionDialogOpen}
+        onClose={() => setCompletionDialogOpen(false)}
+        onComplete={handleCompleteBatch}
+        operator={operator || ""}
       />
 
       <TraceabilityView lot={selectedLot} onClose={() => setSelectedLot(null)} />

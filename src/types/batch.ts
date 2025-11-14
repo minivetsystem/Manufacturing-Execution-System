@@ -11,7 +11,7 @@ export interface Batch {
   id: string;
   productName: string;
   targetQuantity: number;
-  uom: string;
+  unit: string;
   status: BatchStatus;
   startTime?: string;
   endTime?: string;
@@ -24,6 +24,7 @@ export interface CompletedBatch extends Batch {
   actualYield: number;
   scrapQuantity: number;
   lotNumber: string;
+  materialsUsed: Material[];
 }
 
 export interface Lot {
@@ -31,11 +32,12 @@ export interface Lot {
   product: string;
   yield: number;
   batchId: string;
+  completedAt: string;
   operator: string;
   inputs: {
     material: string;
     qty: number;
     unit: string;
   }[];
-  completedAt: string;
+  
 }
