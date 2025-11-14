@@ -152,10 +152,6 @@ export const TraceabilityView = ({ lot, onClose }: TraceabilityViewProps) => {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Network className="h-5 w-5" />
-                Lot Details: {lot?.lot}
-              </CardTitle>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="details" className="w-full">
@@ -165,7 +161,7 @@ export const TraceabilityView = ({ lot, onClose }: TraceabilityViewProps) => {
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-4 pt-2 gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground">Product</p>
                       <p className="font-medium">{lot?.product}</p>
@@ -196,8 +192,8 @@ export const TraceabilityView = ({ lot, onClose }: TraceabilityViewProps) => {
                     <h4 className="font-semibold mb-3">Input Materials</h4>
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Material</TableHead>
+                        <TableRow className="bg-gray-300">
+                          <TableHead >Material</TableHead>
                           <TableHead className="text-right">Quantity</TableHead>
                           <TableHead>Unit</TableHead>
                         </TableRow>
