@@ -25,9 +25,10 @@ const ManufacturingDashboard = () => {
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
  const { batches, updateBatch, completeBatch } = useManufacturing();
    const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
+   
   useEffect(() => {
     if (!operator) {
-      navigate("/login");
+      navigate("/");
     }
   }, [operator, navigate]);
 
@@ -61,46 +62,12 @@ const ManufacturingDashboard = () => {
     setCompletionDialogOpen(true);
   };
 
-  // const handleSaveCompletion = (data: {
-  //   batchId: string;
-  //   actualYield: number;
-  //   scrapQuantity: number;
-  //   lotNumber: string;
-  //   materials: any[];
-  //   operator: string;
-  // }) => {
+  
 
-  //   if (selectedBatch) {
-  //     completeBatch(selectedBatch.id, data);
-  //     setCompletionDialogOpen(false);
-  //     setSelectedBatch(null);
-  //   }
-
-  //   const batch = batches.find((b) => b.id === data.batchId);
-  //   if (batch) {
-  //     const newLot: Lot = {
-  //       lot: data.lotNumber,
-  //       product: batch.productName,
-  //       yield: data.actualYield,
-  //       batchId: data.batchId,
-  //       operator: data.operator,
-  //       inputs: data.materials.map((m) => ({
-  //         material: m.name,
-  //         qty: m.actualQty || m.plannedQty,
-  //         unit: m.unit,
-  //       })),
-  //       completedAt: new Date().toISOString(),
-  //     };
-  //     setLots((prev) => [newLot, ...prev]);
-  //   }
-
-  //   setCompletingBatch(null);
-  //   toast.success(`Batch ${data.batchId} completed successfully! Lot: ${data.lotNumber}`);
-  // };
 
    const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
 const activeBatches = batches.filter((b) => b.status !== "Completed");

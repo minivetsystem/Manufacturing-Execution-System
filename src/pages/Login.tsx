@@ -30,7 +30,7 @@ export default function Login() {
       title: "Welcome!",
       description: `Logged in as ${selectedOperator}`,
     });
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
